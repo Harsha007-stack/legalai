@@ -1,0 +1,13 @@
+[build]
+  command = "npm install --include=dev && npm run build"
+  publish = "client/dist"
+
+[build.environment]
+  NODE_VERSION = "22.14.0"
+  NPM_FLAGS = "--include=dev"
+  VITE_API_BASE_URL = "https://nyayaconnect-96vw.onrender.com"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

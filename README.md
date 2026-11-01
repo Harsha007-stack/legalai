@@ -40,6 +40,15 @@ The included [`render.yaml`](./render.yaml) deploys the Vite frontend and Expres
 
 Render's free service may sleep while idle, so the first request after inactivity can take longer. Deploying a new commit triggers a fresh build; the `VITE_SUPABASE_*` values are read during that build.
 
+## Netlify frontend deployment
+
+The included [`netlify.toml`](./netlify.toml) builds and publishes the Vite frontend on Netlify. The API remains hosted on Render, so configure these values in Netlify's environment variables before deploying:
+
+- `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for the browser client.
+- `VITE_API_BASE_URL=https://nyayaconnect-96vw.onrender.com` for API requests.
+
+Set `CLIENT_URL=https://nyayaconnect.netlify.app` in the Render service environment so its API accepts requests from the Netlify site. Add the Netlify URL to Supabase Auth's site URL and allowed redirect URLs. Keep server-side AI keys only in Render; never add them to Netlify `VITE_` variables.
+
 To let clients attach a document to a pending consultation request, run [`supabase/migrations/202611010008_request_document_sharing.sql`](./supabase/migrations/202611010008_request_document_sharing.sql) in the Supabase SQL Editor after migrations 001–007. The advocate can open the private attachment from the request inbox; the client’s concern and document are shared with the selected advocate when the request is sent.
 
 Advocate profiles support multiple practice areas and an optional AI bio draft. The draft uses only the advocate’s profile details and notes, is editable, and is not published until the advocate saves the profile. For a live consultation request, clients must separately consent to AI processing of their concern and any attachment for a preliminary advocate-facing brief, and to sharing an attachment with the advocate. If AI generation or document text extraction is unavailable, the request can still be sent with the client’s original concern and consented attachment; the inbox labels the brief as unavailable rather than presenting it as analyzed. The brief and original concern are stored together in the existing `case_summary` field; this feature does not require another database migration. AI summaries are unverified, are not legal advice, and should be checked with the client.
