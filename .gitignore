@@ -3,6 +3,7 @@
 !.env.example
 !.env.*.example
 node_modules/
+.netlify/
 client/node_modules/
 client/dist/
 server/node_modules/
