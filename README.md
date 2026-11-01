@@ -29,16 +29,16 @@ The Node server serves both the built frontend and API on the same port. Configu
 
 The assistant provides general legal information and does not retrieve verified legal sources. It asks up to three structured follow-up questions per turn and suggests practical next steps. Advocate profile publishing, real consultation requests, status changes, private case messages, and consultation document uploads use Supabase. Call signaling uses browser peer-to-peer WebRTC with a public STUN server; networks requiring a TURN relay may not connect. Fictional sample profiles support session-only demo requests; these are not sent to advocates and never enable chat, uploads, or calls. Displayed consultation prices are indicative ranges provided by advocates and must be confirmed directly.
 
-## Netlify deployment
+## Render deployment
 
-Netlify hosts the Vite frontend. Deploy the Express API separately (the included [`render.yaml`](./render.yaml) can create it on Render); keeping the API on a Node web service avoids serverless execution limits for document OCR and AI requests.
+The included [`render.yaml`](./render.yaml) deploys the Vite frontend and Express API together as one Node web service. This keeps API calls same-origin and supports longer document OCR and AI requests without a separate frontend/API host.
 
-1. Import this GitHub repository into Netlify. Netlify reads [`netlify.toml`](./netlify.toml): the build command is `npm run build`, and the publish directory is `client/dist`. The redirect rule supports client-side routes.
-2. Deploy the API from the repository on Render using the included Blueprint. Set its required `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GEMINI_API_KEY`, and `CLIENT_URL` environment variables. `CLIENT_URL` must be the exact deployed Netlify site origin (for example, `https://your-site.netlify.app`). Add any configured document-provider keys in Render's environment settings. Never commit or put provider secrets in Netlify `VITE_` variables.
-3. In Netlify's environment settings, add `VITE_API_BASE_URL` with the Render API origin (for example, `https://nyayaconnect-api.onrender.com`), `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY`. Trigger a new deploy after setting or changing these values; Vite embeds them at build time.
-4. In Supabase Auth URL configuration, add the deployed Netlify URL to the allowed redirect URLs and set the production site URL. Keep the existing database migrations applied.
+1. Sign in to Render, choose **New → Blueprint**, connect `Harsha007-stack/legalai`, and deploy the `main` branch.
+2. When Render prompts for environment values, enter `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `GEMINI_API_KEY` in Render's dashboard. The Supabase URL and anon/public key are from **Supabase → Project Settings → API**. Create a fresh Gemini API key in Google AI Studio. Do not put AI provider keys in `VITE_` variables or commit them to GitHub. Optional Groq, Kimi, or OpenCode keys can be added in Render if desired.
+3. Wait for the build and deploy to finish. Render assigns a URL such as `https://nyayaconnect.onrender.com`; check its `/api/health` path returns `{"status":"ok","service":"nyayaconnect-api"}`.
+4. In Supabase Auth URL configuration, set the Render URL as the production site URL and add it to the allowed redirect URLs. Keep the existing database migrations applied.
 
-Check `https://<your-api-host>/api/health` after the API deploy; it should return `{"status":"ok","service":"nyayaconnect-api"}`. Render's free service may sleep while idle, so the first API request after inactivity can be slow.
+Render's free service may sleep while idle, so the first request after inactivity can take longer. Deploying a new commit triggers a fresh build; the `VITE_SUPABASE_*` values are read during that build.
 
 To let clients attach a document to a pending consultation request, run [`supabase/migrations/202611010008_request_document_sharing.sql`](./supabase/migrations/202611010008_request_document_sharing.sql) in the Supabase SQL Editor after migrations 001–007. The advocate can open the private attachment from the request inbox; the client’s concern and document are shared with the selected advocate when the request is sent.
 

@@ -7,7 +7,7 @@ dotenv.config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.e
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(5000),
-  CLIENT_URL: z.string().url().default('http://localhost:5173'),
+  CLIENT_URL: z.string().url().default(process.env.RENDER_EXTERNAL_URL || 'http://localhost:5173'),
   SUPABASE_URL: z.string().url(),
   SUPABASE_ANON_KEY: z.string().min(1),
   GEMINI_API_KEY: z.string().optional().default(''),
